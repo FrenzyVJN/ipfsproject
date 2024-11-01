@@ -14,12 +14,11 @@ export default function FileFetch() {
     setFetchStatus('fetching')
     console.log("Fetching file from IPFS");
     try {
-      const response = await fetch("/api/fetchfile"
-        ,
+      const response = await fetch("/api/fetchfile",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ hash: fileInfo.hash })
+          body: JSON.stringify({hash : fileInfo.hash})
         }
       );
       const result = await response.json();
