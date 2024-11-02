@@ -2,43 +2,43 @@
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.22;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract FileStorage is ERC721, ERC721URIStorage, Ownable {
+contract FileStorage is Ownable {
     uint256 private _nextTokenId;
+    // create an array of cid
+    string[] private cids;
 
-    constructor(address initialOwner)
-        ERC721("Frenzy", "FNY")
+    constructor(
+        address initialOwner
+    )
+        // initialize the list of cids
         Ownable(initialOwner)
     {}
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "https://black-imperial-butterfly-905.mypinata.cloud/ipfs/";
+    //function to pin CID
+    function addCid(string memory cid) public onlyOwner {
+        cids.push(cid);
+    }
+    //function to list all CIDs
+    function listCids() public view returns (string[] memory) {
+        return cids;
+    }
+    //function to unpin CID
+    function removeCid(string memory cid) public onlyOwner {
+        for (uint256 i = 0; i < cids.length; i++) {
+            if (
+                keccak256(abi.encodePacked(cids[i])) ==
+                keccak256(abi.encodePacked(cid))
+            ) {
+                cids[i] = cids[cids.length - 1];
+                cids.pop();
+                break;
+            }
+        }
     }
 
-    function safeMint(address to, string memory uri) public onlyOwner {
-        uint256 tokenId = _nextTokenId++;
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
-    }
-
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
-        return super.tokenURI(tokenId);
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
+    function clearCids() public onlyOwner {
+        delete cids;
     }
 }
