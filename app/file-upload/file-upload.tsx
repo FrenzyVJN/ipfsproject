@@ -80,106 +80,39 @@ export default function FileUpload() {
           // const provider = new JsonRpcProvider("https://polygon-amoy.blockpi.network/v1/rpc/public");
           // const accounts = await provider.send("eth_requestAccounts", []);
           // setWalletAddress(accounts[0]);
-          const contractAddress = "0x7123e30b0b00948B3371d45FE39b72bA1b64EBa7"; // Replace with your deployed contract address
+          const contractAddress = "0xBf46CAD5708c99142798B054020C3E1ACCB91D8B"; // Replace with your deployed contract address
           const contractABI = [
             {
-              type: "constructor",
-              inputs: [
-                {
-                  name: "initialOwner",
-                  type: "address",
-                  internalType: "address",
-                },
+              "type": "function",
+              "name": "addCid",
+              "inputs": [{ "name": "cid", "type": "string", "internalType": "string" }],
+              "outputs": [],
+              "stateMutability": "nonpayable"
+            },
+            {
+              "type": "function",
+              "name": "clearCids",
+              "inputs": [],
+              "outputs": [],
+              "stateMutability": "nonpayable"
+            },
+            {
+              "type": "function",
+              "name": "listCids",
+              "inputs": [],
+              "outputs": [
+                { "name": "", "type": "string[]", "internalType": "string[]" }
               ],
-              stateMutability: "nonpayable",
+              "stateMutability": "view"
             },
             {
-              type: "function",
-              name: "addCid",
-              inputs: [{ name: "cid", type: "string", internalType: "string" }],
-              outputs: [],
-              stateMutability: "nonpayable",
-            },
-            {
-              type: "function",
-              name: "clearCids",
-              inputs: [],
-              outputs: [],
-              stateMutability: "nonpayable",
-            },
-            {
-              type: "function",
-              name: "listCids",
-              inputs: [],
-              outputs: [
-                { name: "", type: "string[]", internalType: "string[]" },
-              ],
-              stateMutability: "view",
-            },
-            {
-              type: "function",
-              name: "owner",
-              inputs: [],
-              outputs: [{ name: "", type: "address", internalType: "address" }],
-              stateMutability: "view",
-            },
-            {
-              type: "function",
-              name: "removeCid",
-              inputs: [{ name: "cid", type: "string", internalType: "string" }],
-              outputs: [],
-              stateMutability: "nonpayable",
-            },
-            {
-              type: "function",
-              name: "renounceOwnership",
-              inputs: [],
-              outputs: [],
-              stateMutability: "nonpayable",
-            },
-            {
-              type: "function",
-              name: "transferOwnership",
-              inputs: [
-                { name: "newOwner", type: "address", internalType: "address" },
-              ],
-              outputs: [],
-              stateMutability: "nonpayable",
-            },
-            {
-              type: "event",
-              name: "OwnershipTransferred",
-              inputs: [
-                {
-                  name: "previousOwner",
-                  type: "address",
-                  indexed: true,
-                  internalType: "address",
-                },
-                {
-                  name: "newOwner",
-                  type: "address",
-                  indexed: true,
-                  internalType: "address",
-                },
-              ],
-              anonymous: false,
-            },
-            {
-              type: "error",
-              name: "OwnableInvalidOwner",
-              inputs: [
-                { name: "owner", type: "address", internalType: "address" },
-              ],
-            },
-            {
-              type: "error",
-              name: "OwnableUnauthorizedAccount",
-              inputs: [
-                { name: "account", type: "address", internalType: "address" },
-              ],
-            },
-          ];
+              "type": "function",
+              "name": "removeCid",
+              "inputs": [{ "name": "cid", "type": "string", "internalType": "string" }],
+              "outputs": [],
+              "stateMutability": "nonpayable"
+            }
+          ]
           const signer = await provider.getSigner();
           console.log(signer);
           const contract = new ethers.Contract(
