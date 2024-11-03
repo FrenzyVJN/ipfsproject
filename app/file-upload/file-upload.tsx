@@ -1,5 +1,11 @@
 "use client";
 import { useState, useCallback, useEffect } from "react";
+
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, Check, AlertCircle, Wallet } from "lucide-react";
