@@ -11,16 +11,21 @@ export default function FileUpload() {
   const [uploadStatus, setUploadStatus] = useState<
     "idle" | "uploading" | "success" | "error"
   >("idle");
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
   const [ipfsHash, setIpfsHash] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const provider = new ethers.BrowserProvider(window.ethereum)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.ethereum) {
+      const providerInstance = new ethers.BrowserProvider(window.ethereum);
+      setProvider(providerInstance);
+    }
+  }, []);
   var accounts;
 
   const connectWallet = async () => {
-    if (typeof window.ethereum !== "undefined") {
+    if (provider) {
       try {
-        // provider = new ethers.BrowserProvider(window.ethereum);
-        accounts = await provider.send("eth_requestAccounts", []);
+        const accounts = await provider.send("eth_requestAccounts", []);
         setWalletAddress(accounts[0]);
       } catch (error) {
         console.error("Wallet connection failed:", error);
@@ -29,7 +34,6 @@ export default function FileUpload() {
       alert("Please install a MetaMask wallet to use this feature.");
     }
   };
-
   const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
@@ -113,6 +117,10 @@ export default function FileUpload() {
               "stateMutability": "nonpayable"
             }
           ]
+
+          if (!provider) {
+            throw new Error("Provider is not available");
+          }
           const signer = await provider.getSigner();
           console.log(signer);
           const contract = new ethers.Contract(
