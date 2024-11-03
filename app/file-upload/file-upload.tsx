@@ -1,22 +1,26 @@
-'use client'
-import { useState, useCallback, useEffect } from 'react';
+"use client";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Check, AlertCircle, Wallet } from 'lucide-react';
-import { ethers } from 'ethers';
+import { Upload, Check, AlertCircle, Wallet } from "lucide-react";
+import { ethers, JsonRpcProvider } from "ethers";
 
 export default function FileUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "uploading" | "success" | "error"
+  >("idle");
   const [ipfsHash, setIpfsHash] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const provider = new ethers.BrowserProvider(window.ethereum)
+  var accounts;
 
   const connectWallet = async () => {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== "undefined") {
       try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await provider.send('eth_requestAccounts', []);
+        // provider = new ethers.BrowserProvider(window.ethereum);
+        accounts = await provider.send("eth_requestAccounts", []);
         setWalletAddress(accounts[0]);
       } catch (error) {
         console.error("Wallet connection failed:", error);
@@ -44,38 +48,163 @@ export default function FileUpload() {
     }
   }, []);
 
-  const addFile = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const addFile = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     if (!file) return;
-    
+
     const targetBtn = e.currentTarget;
     targetBtn.disabled = true;
-    setUploadStatus('uploading');
-    
-    const formData = new FormData();
-    formData.append("file", file);
+    setUploadStatus("uploading");
+
+    // const formData = new FormData();
+    // // upload the file
 
     console.log("Adding file to IPFS");
-    try {    
-      const response = await fetch("/api/add", {
+    var response;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (walletAddress) {
+        formData.append("address", walletAddress);
+      }
+      response = await fetch("/api/upload-file", {
         method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-      },  
-        body: JSON.stringify({
-          file: file,
-          address: walletAddress
-        }),
+        body: formData,
       });
 
       if (response.ok) {
         const data = await response.json();
-        setIpfsHash(data["IpfsHash"]);
-        setUploadStatus('success');
+        setIpfsHash(data["cid"]);
+        try {
+          // const provider = new JsonRpcProvider("https://polygon-amoy.blockpi.network/v1/rpc/public");
+          // const accounts = await provider.send("eth_requestAccounts", []);
+          // setWalletAddress(accounts[0]);
+          const contractAddress = "0x7123e30b0b00948B3371d45FE39b72bA1b64EBa7"; // Replace with your deployed contract address
+          const contractABI = [
+            {
+              type: "constructor",
+              inputs: [
+                {
+                  name: "initialOwner",
+                  type: "address",
+                  internalType: "address",
+                },
+              ],
+              stateMutability: "nonpayable",
+            },
+            {
+              type: "function",
+              name: "addCid",
+              inputs: [{ name: "cid", type: "string", internalType: "string" }],
+              outputs: [],
+              stateMutability: "nonpayable",
+            },
+            {
+              type: "function",
+              name: "clearCids",
+              inputs: [],
+              outputs: [],
+              stateMutability: "nonpayable",
+            },
+            {
+              type: "function",
+              name: "listCids",
+              inputs: [],
+              outputs: [
+                { name: "", type: "string[]", internalType: "string[]" },
+              ],
+              stateMutability: "view",
+            },
+            {
+              type: "function",
+              name: "owner",
+              inputs: [],
+              outputs: [{ name: "", type: "address", internalType: "address" }],
+              stateMutability: "view",
+            },
+            {
+              type: "function",
+              name: "removeCid",
+              inputs: [{ name: "cid", type: "string", internalType: "string" }],
+              outputs: [],
+              stateMutability: "nonpayable",
+            },
+            {
+              type: "function",
+              name: "renounceOwnership",
+              inputs: [],
+              outputs: [],
+              stateMutability: "nonpayable",
+            },
+            {
+              type: "function",
+              name: "transferOwnership",
+              inputs: [
+                { name: "newOwner", type: "address", internalType: "address" },
+              ],
+              outputs: [],
+              stateMutability: "nonpayable",
+            },
+            {
+              type: "event",
+              name: "OwnershipTransferred",
+              inputs: [
+                {
+                  name: "previousOwner",
+                  type: "address",
+                  indexed: true,
+                  internalType: "address",
+                },
+                {
+                  name: "newOwner",
+                  type: "address",
+                  indexed: true,
+                  internalType: "address",
+                },
+              ],
+              anonymous: false,
+            },
+            {
+              type: "error",
+              name: "OwnableInvalidOwner",
+              inputs: [
+                { name: "owner", type: "address", internalType: "address" },
+              ],
+            },
+            {
+              type: "error",
+              name: "OwnableUnauthorizedAccount",
+              inputs: [
+                { name: "account", type: "address", internalType: "address" },
+              ],
+            },
+          ];
+          const signer = await provider.getSigner();
+          console.log(signer);
+          const contract = new ethers.Contract(
+            contractAddress,
+            contractABI,
+            signer
+          );
+          const txResponse = await contract.addCid(data["cid"], {
+            gasLimit: 300000, // adjust as needed
+          }); // This returns a transaction response object
+
+          // Wait for the transaction to be confirmed
+          const receipt = await txResponse.wait();
+
+          // await signer.sendTransaction(tx);
+        } catch (error) {
+          console.log(error);
+        }
+
+        setUploadStatus("success");
       } else {
-        setUploadStatus('error');
+        setUploadStatus("error");
       }
     } catch (error) {
-      setUploadStatus('error');
+      setUploadStatus("error");
     } finally {
       targetBtn.disabled = false;
     }
@@ -90,29 +219,34 @@ export default function FileUpload() {
         {/* Wallet Connection */}
         <div className="mb-4 flex items-center justify-between">
           <Button onClick={connectWallet} variant="secondary">
-            <Wallet className="mr-2" /> {walletAddress ? 'Connected' : 'Connect Wallet'}
+            <Wallet className="mr-2" />{" "}
+            {walletAddress ? "Connected" : "Connect Wallet"}
           </Button>
           {walletAddress && (
-            <p className="text-sm text-gray-600">Wallet: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+            <p className="text-sm text-gray-600">
+              Wallet: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+            </p>
           )}
         </div>
 
         {/* Drag-and-Drop Area */}
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center ${
-            isDragging ? 'border-primary bg-primary/10' : 'border-gray-300'
+            isDragging ? "border-primary bg-primary/10" : "border-gray-300"
           }`}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
-          onClick={() => document.getElementById('fileInput')?.click()}
+          onClick={() => document.getElementById("fileInput")?.click()}
         >
           {file ? (
             <div className="text-sm">{file.name}</div>
           ) : (
             <div>
               <Upload className="mx-auto h-12 w-12 text-gray-400" />
-              <p className="mt-2 text-sm text-gray-600">Drag and drop your file here, or click to select a file</p>
+              <p className="mt-2 text-sm text-gray-600">
+                Drag and drop your file here, or click to select a file
+              </p>
             </div>
           )}
         </div>
@@ -127,21 +261,22 @@ export default function FileUpload() {
         <Button
           className="mt-4 w-full"
           onClick={addFile}
-          disabled={!file || uploadStatus === 'uploading' || !walletAddress}
+          disabled={!file || uploadStatus === "uploading" || !walletAddress}
         >
-          {uploadStatus === 'uploading' ? 'Uploading...' : 'Upload to IPFS'}
+          {uploadStatus === "uploading" ? "Uploading..." : "Upload to IPFS"}
         </Button>
 
         {/* Upload Status */}
-        {uploadStatus === 'success' && (
+        {uploadStatus === "success" && (
           <div className="mt-2 text-green-600 flex-col flex">
-            <Check className="mr-2 flex items-center justify-center" /> File uploaded successfully
+            <Check className="mr-2 flex items-center justify-center" /> File
+            uploaded successfully
             <div>
               <p>IPFS Hash: {ipfsHash}</p>
             </div>
           </div>
         )}
-        {uploadStatus === 'error' && (
+        {uploadStatus === "error" && (
           <div className="mt-2 text-red-600 flex items-center justify-center">
             <AlertCircle className="mr-2" /> Error uploading file
           </div>

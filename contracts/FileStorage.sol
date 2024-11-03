@@ -1,44 +1,36 @@
 // SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.22;
+contract FileStorage {
+    // Mapping to store a list of CIDs for each user
+    mapping(address => string[]) private cids;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-contract FileStorage is Ownable {
-    uint256 private _nextTokenId;
-    // create an array of cid
-    string[] private cids;
-
-    constructor(
-        address initialOwner
-    )
-        // initialize the list of cids
-        Ownable(initialOwner)
-    {}
-
-    //function to pin CID
-    function addCid(string memory cid) public onlyOwner {
-        cids.push(cid);
+    // Function to add a CID for the calling user
+    function addCid(string memory cid) public {
+        cids[msg.sender].push(cid);
     }
-    //function to list all CIDs
+
+    // Function to list all CIDs for the calling user
     function listCids() public view returns (string[] memory) {
-        return cids;
+        return cids[msg.sender];
     }
-    //function to unpin CID
-    function removeCid(string memory cid) public onlyOwner {
-        for (uint256 i = 0; i < cids.length; i++) {
+
+    // Function to remove a specific CID for the calling user
+    function removeCid(string memory cid) public {
+        string[] storage userCids = cids[msg.sender];
+        for (uint256 i = 0; i < userCids.length; i++) {
             if (
-                keccak256(abi.encodePacked(cids[i])) ==
+                keccak256(abi.encodePacked(userCids[i])) ==
                 keccak256(abi.encodePacked(cid))
             ) {
-                cids[i] = cids[cids.length - 1];
-                cids.pop();
+                userCids[i] = userCids[userCids.length - 1]; // Replace with the last CID
+                userCids.pop(); // Remove the last CID
                 break;
             }
         }
     }
 
-    function clearCids() public onlyOwner {
-        delete cids;
+    // Function to clear all CIDs for the calling user
+    function clearCids() public {
+        delete cids[msg.sender];
     }
 }
