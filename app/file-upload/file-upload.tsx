@@ -84,8 +84,10 @@ export default function FileUpload() {
       });
       console.log("upload successful");
       if (response.ok) {
+        console.log(response);
         const data = await response.json();
         setIpfsHash(data.cid);
+        console.log(ipfsHash);
         setUploadStatus("success");
         try {
           // const provider = new JsonRpcProvider("https://polygon-amoy.blockpi.network/v1/rpc/public");

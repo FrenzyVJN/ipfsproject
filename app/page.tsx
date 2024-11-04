@@ -1,27 +1,27 @@
-'use client'
-export default function Home() {
-  const addFile = async (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    const targetBtn = e.currentTarget;
-    targetBtn.disabled = true;
-    console.log("Adding file to IPFS");
-    const response = await fetch("/api/addtest", {
-      method: "POST",
-      headers: { "Content-Type": "application/json"},
-    });
-    targetBtn.disabled = false;
-    console.log(response);
-    console.log("Successfully added file to IPFS")
-  }
-  const fetchFile = async () => {
-    console.log("Fetching file from IPFS");
-    const response = await fetch("/api/fetchfile");
-    const result = await response.json();
-    console.log(result);
-  }
+"use client";
+import { motion } from "framer-motion";
+import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
+
+export default function HeroHighlightDemo() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <button className="bg-[#000] text-[#fff] px-4 py-2 rounded-md" onClick={(e)=>addFile(e)}>Add</button>
-      <button className="bg-[#000] text-[#fff] px-4 py-2 rounded-md" onClick={fetchFile}>Get</button>
-    </div>
+    <HeroHighlight>
+      <motion.h1
+        initial={{
+          opacity: 0,
+          y: 20,
+        }}
+        animate={{
+          opacity: 1,
+          y: [20, -5, 0],
+        }}
+        transition={{
+          duration: 0.5,
+          ease: [0.4, 0.0, 0.2, 1],
+        }}
+        className=" text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto "
+      >
+        Securely store your files with <Highlight className="text-black dark:text-white">DeDrive</Highlight>—a decentralized cloud solution. Enjoy true data ownership today!
+      </motion.h1>
+    </HeroHighlight>
   );
 }

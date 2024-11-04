@@ -20,8 +20,9 @@ export async function POST(req: NextRequest) {
       },
       body: formData,
     });
+    console.log(res);
     const { IpfsHash } = await res.json();
-    console.log(typeof IpfsHash);
+    console.log(IpfsHash);
 
     // const uri = upload.IpfsHash;
     // console.log(upload);
