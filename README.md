@@ -1,5 +1,3 @@
-Based on your project details, here's a draft README file for your GitHub repository:
-
 ---
 
 # Secure IPFS Drive
