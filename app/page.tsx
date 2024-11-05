@@ -1,8 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
 import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
-
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 export default function HeroHighlightDemo() {
+  const router = useRouter();
+  const handleButtonClick = () => {
+    router.push("/file-upload");
+  };
+
   return (
     <HeroHighlight>
       <motion.h1
@@ -22,6 +28,9 @@ export default function HeroHighlightDemo() {
       >
         Securely store your files with <Highlight className="text-black dark:text-white">DeDrive</Highlight>—a decentralized cloud solution. Enjoy true data ownership today!
       </motion.h1>
+      <Button className="mx-auto flex p-4" onClick={handleButtonClick}>
+        Get Started
+      </Button>
     </HeroHighlight>
   );
 }

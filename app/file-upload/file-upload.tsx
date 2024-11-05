@@ -215,6 +215,7 @@ export default function FileUpload() {
         >
           {uploadStatus === "uploading" ? "Uploading..." : "Upload to IPFS"}
         </Button>
+        <div className="text-[10px]">You need metamask wallet to connect to the blockchain</div>
 
         {/* Upload Status */}
         {uploadStatus === "success" && (
