@@ -63,10 +63,6 @@ To run this project locally:
 - **Next.js**: Frontend framework for building the UI.
 - **Vercel**: Deployment platform.
 
-## License
-
-This project is licensed under the MIT License.
-
-## Contact
-
-For any questions or support, please contact us via GitHub.
+## Developed By
+- Surya Narayanan [A.none.imus](https://github.com/Surya-nara0123)
+- Vijayan Sankar [FrenzyVJN](https://github.com/FrenzyVJN)
